@@ -1,7 +1,7 @@
 # app/main.py
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import verify, report, map, risk, nearby
+from app.routers import verify, report, map, risk, nearby, ai_companion
 from dotenv import load_dotenv
 
 
@@ -21,6 +21,7 @@ app.include_router(report.router)
 app.include_router(map.router)
 app.include_router(risk.router)
 app.include_router(nearby.router)
+app.include_router(ai_companion.router)
 
 @app.get("/")
 async def root():
