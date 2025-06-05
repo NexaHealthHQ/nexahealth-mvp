@@ -7,17 +7,21 @@ nexahealth-backend/
 │   │   ├── report.py
 │   │   ├── map.py
 │   │   ├── nearby.py
-│   │   └── diagnosis.py        # NEW: symptom fuzzy matching & diagnosis
+│   │   ├── diagnosis.py
+│   │   └── ai_companion.py      # ✅ New: Chat route using OpenRouter
 │   ├── models/
 │   │   ├── report_model.py
-│   │   └── diagnosis_model.py  # NEW: Pydantic models for diagnosis endpoint
+│   │   ├── diagnosis_model.py
+│   │   └── chat_model.py        # ✅ New: Pydantic model for chat messages
 │   ├── core/
 │   │   ├── db.py
 │   │   ├── ml.py
-│   │   └── symptom_matcher.py  # NEW: fuzzy matching & CSV loading logic
+│   │   ├── symptom_matcher.py
+│   │   └── openrouter_ai.py     # ✅ New: OpenRouter integration logic
 │   └── data/
 │       ├── verified_drugs.json
-│       └── symptom_data.csv    # Place your symptom CSV here
+│       ├── symptom_data.csv
+│       └── mental_health_prompts.json  # ✅ Optional: for fallback/rules
 │
 ├── ml/
 │   ├── train_model.py
