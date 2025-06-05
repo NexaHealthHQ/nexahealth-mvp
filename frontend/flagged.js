@@ -36,24 +36,22 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Initialize Main Map (Flagged Pharmacies) - Now lazy loaded
+    // Initialize Main Map (Flagged Pharmacies)
     let mainMap = null;
     let pharmacyIcon = null;
 
     function initializeMainMap() {
         if (!mainMap) {
             mainMap = L.map('pharmacy-map', {
-                preferCanvas: true, // Better performance for many markers
-                fadeAnimation: false, // Disable fade animation for faster rendering
-                zoomControl: false // We'll add our own later
+                preferCanvas: true,
+                fadeAnimation: false,
+                zoomControl: false
             }).setView([9.0820, 8.6753], 6); // Center on Nigeria
 
-            // Add zoom control with better position
             L.control.zoom({
                 position: 'topright'
             }).addTo(mainMap);
 
-            // Cache tiles for better performance
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
                 maxZoom: 19,
@@ -61,7 +59,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 updateWhenIdle: true
             }).addTo(mainMap);
 
-            // Icon for flagged pharmacies - only create once
+            // Add a scale control
+            L.control.scale().addTo(mainMap);
+
             pharmacyIcon = L.icon({
                 iconUrl: 'https://cdn0.iconfinder.com/data/icons/small-n-flat/24/678111-map-marker-512.png',
                 iconSize: [32, 32],
@@ -149,7 +149,7 @@ document.addEventListener('DOMContentLoaded', function() {
             drug: document.getElementById('drug-filter').value,
             sort_by: document.getElementById('sort-by').value,
             sort_order: document.getElementById('sort-order').value,
-            limit: document.getElementById('per-page').value
+            limit: document.getElementById('per-page').value || '10' // Default to 10 if not set
         };
 
         // Show loading state
@@ -752,8 +752,8 @@ document.addEventListener('DOMContentLoaded', function() {
             preferCanvas: true,
             fadeAnimation: false,
             zoomControl: false,
-            zoomSnap: isMobile ? 0.5 : 0.1, // Less zoom levels on mobile
-            wheelPxPerZoomLevel: isMobile ? 120 : 60, // Slower zoom on mobile
+            zoomSnap: isMobile ? 0.5 : 0.1,
+            wheelPxPerZoomLevel: isMobile ? 120 : 60,
             touchZoom: isMobile ? 'center' : true
         }).setView([userLocation.lat, userLocation.lng], isMobile ? 13 : 14);
 
@@ -761,61 +761,33 @@ document.addEventListener('DOMContentLoaded', function() {
             position: 'topright'
         }).addTo(nearbyMap);
 
-        // Use simpler tiles for mobile
-        const tileLayerUrl = isMobile
-            ? 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
-            : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-
-        L.tileLayer(tileLayerUrl, {
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
             maxZoom: 19,
             reuseTiles: true,
             updateWhenIdle: true,
-            detectRetina: isMobile // Better rendering on retina displays
+            detectRetina: isMobile
         }).addTo(nearbyMap);
 
-        // Simplify markers for mobile
-        const markerOptions = isMobile ? {
-            icon: L.divIcon({
-                className: 'custom-marker',
-                html: '<div class="marker-pin"></div>',
-                iconSize: [30, 42],
-                iconAnchor: [15, 42]
-            }),
-            riseOnHover: false
-        } : {
+        // Add user location marker with a blue circle around it
+        const userMarker = L.marker([userLocation.lat, userLocation.lng], {
             icon: L.icon({
                 iconUrl: 'https://cdn0.iconfinder.com/data/icons/small-n-flat/24/678111-map-marker-512.png',
                 iconSize: [32, 32],
                 iconAnchor: [16, 32],
                 popupAnchor: [0, -32]
             })
-        };
+        }).addTo(nearbyMap)
+          .bindPopup('Your Location')
+          .openPopup();
 
-        // Add user location marker
-        L.marker([userLocation.lat, userLocation.lng], markerOptions)
-            .addTo(nearbyMap)
-            .bindPopup('Your Location')
-            .openPopup();
-
-        // Add CSS for mobile markers
-        if (isMobile) {
-            const style = document.createElement('style');
-            style.textContent = `
-                .custom-marker .marker-pin {
-                    width: 30px;
-                    height: 30px;
-                    border-radius: 50% 50% 50% 0;
-                    background: #3b82f6;
-                    transform: rotate(-45deg);
-                    position: absolute;
-                    left: 50%;
-                    top: 50%;
-                    margin: -15px 0 0 -15px;
-                }
-            `;
-            document.head.appendChild(style);
-        }
+        // Add a circle around user location to show accuracy
+        L.circle([userLocation.lat, userLocation.lng], {
+            color: '#3b82f6',
+            fillColor: '#3b82f6',
+            fillOpacity: 0.2,
+            radius: 500 // 500 meter radius
+        }).addTo(nearbyMap);
 
         // Create a marker cluster group for better performance
         const nearbyMarkerCluster = L.markerClusterGroup({
@@ -842,13 +814,36 @@ document.addEventListener('DOMContentLoaded', function() {
             }).bindPopup(`
                 <h3 class="font-bold">${place.name}</h3>
                 <p class="text-sm">${place.address || 'Address not available'}</p>
+                ${place.distance_meters ? `<p class="text-sm"><i class="fas fa-walking mr-1"></i> ${Math.round(place.distance_meters)} meters away</p>` : ''}
                 ${place.phone ? `<p class="text-sm mt-1"><i class="fas fa-phone-alt mr-1"></i> ${place.phone}</p>` : ''}
+                ${place.website ? `<p class="text-sm mt-1"><i class="fas fa-globe mr-1"></i> <a href="${place.website}" target="_blank" class="text-primary">Website</a></p>` : ''}
             `);
+
+            // Add a line from user location to this place
+            const line = L.polyline(
+                [
+                    [userLocation.lat, userLocation.lng],
+                    [place.location.lat, place.location.lng]
+                ],
+                {
+                    color: '#3b82f6',
+                    weight: 1,
+                    opacity: 0.5,
+                    dashArray: '5, 5'
+                }
+            ).addTo(nearbyMap);
 
             nearbyMarkerCluster.addLayer(marker);
         });
 
         nearbyMap.addLayer(nearbyMarkerCluster);
+
+        // Fit bounds to show all markers and user location
+        const bounds = nearbyMarkerCluster.getBounds();
+        if (bounds.isValid()) {
+            bounds.extend([userLocation.lat, userLocation.lng]);
+            nearbyMap.fitBounds(bounds, { padding: [50, 50] });
+        }
     }
 
     function showError(title, message) {

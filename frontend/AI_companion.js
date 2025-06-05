@@ -54,7 +54,7 @@ const closeHistoryModal = document.getElementById('close-history-modal');
 historyBtn.addEventListener('click', async () => {
     try {
         const userId = getUserId();
-        const response = await fetch(`https://lyre-4m8l.onrender.com/ai-companion/history?user_id=${userId}`);
+        const response = await fetch(`${BASE_URL}/ai-companion/history?user_id=${userId}`);
         const data = await response.json();
         
         // Update history modal with actual data
@@ -110,7 +110,7 @@ clearAllHistoryBtn.addEventListener('click', async () => {
     if (confirm('Are you sure you want to clear ALL chat history? This cannot be undone.')) {
         try {
             const userId = getUserId();
-            await fetch(`https://lyre-4m8l.onrender.com/ai-companion/history?user_id=${userId}`, {
+            await fetch(`${BASE_URL}/ai-companion/history?user_id=${userId}`, {
                 method: 'DELETE'
             });
             historyModal.classList.add('hidden');
@@ -158,7 +158,7 @@ async function sendMessage() {
     
     try {
         // Send message to backend
-        const response = await fetch(`https://lyre-4m8l.onrender.com/ai-companion/chat`, {
+        const response = await fetch(`${BASE_URL}/ai-companion/chat`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
