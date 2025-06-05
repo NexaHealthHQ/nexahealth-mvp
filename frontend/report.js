@@ -94,7 +94,7 @@ if (document.getElementById('image-upload')) {
     });
 }
 
-// Enhanced Location Functionality
+// Enhanced Location Functionality for Nigeria
 let isGeolocating = false;
 let geolocationWatchId = null;
 let map = null;
@@ -105,45 +105,48 @@ const geocodeCache = new Map();
 function initMap() {
     if (!flaggedContainer) return;
 
-    // Create map if it doesn't exist
-    if (!map) {
-        map = L.map(flaggedContainer, {
-            center: [9.0820, 8.6753], // Default center on Nigeria
-            zoom: 6,
-            zoomControl: false,
-            preferCanvas: true
-        });
+    try {
+        if (typeof L === 'undefined') {
+            throw new Error('Leaflet library not loaded');
+        }
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(map);
+        if (!map) {
+            map = L.map(flaggedContainer, {
+                center: [7.2556, 5.1933], // Default center near Akure
+                zoom: 14,
+                zoomControl: false,
+                preferCanvas: true
+            });
 
-        // Add zoom control with better position
-        L.control.zoom({
-            position: 'topright'
-        }).addTo(map);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
 
-        // Add scale control
-        L.control.scale().addTo(map);
+            L.control.zoom({
+                position: 'topright'
+            }).addTo(map);
+
+            L.control.scale().addTo(map);
+        }
+    } catch (error) {
+        console.error('Map initialization error:', error);
+        showPinFeedback('#ef4444', 'Map functionality not available');
+        return null;
     }
 
     return map;
 }
 
-// Update map display and store coordinates
+// Update location with precise Nigerian address information
 async function updateLocation(lat, lng, address = '') {
-    // Initialize map if not already done
     if (!map) initMap();
 
-    // Center map on new location
     map.setView([lat, lng], 16);
 
-    // Remove existing marker if any
     if (marker) {
         map.removeLayer(marker);
     }
 
-    // Add new marker
     marker = L.marker([lat, lng], {
         icon: L.icon({
             iconUrl: 'https://cdn0.iconfinder.com/data/icons/small-n-flat/24/678111-map-marker-512.png',
@@ -154,7 +157,6 @@ async function updateLocation(lat, lng, address = '') {
         draggable: true
     }).addTo(map);
 
-    // Update marker position when dragged
     marker.on('dragend', function(e) {
         const newPos = marker.getLatLng();
         document.getElementById('latitude').value = newPos.lat;
@@ -162,7 +164,6 @@ async function updateLocation(lat, lng, address = '') {
         updateLocationInfo(newPos.lat, newPos.lng, 'Custom location set');
     });
 
-    // Update form fields
     if (document.getElementById('latitude') && document.getElementById('longitude')) {
         document.getElementById('latitude').value = lat;
         document.getElementById('longitude').value = lng;
@@ -175,7 +176,6 @@ async function updateLocation(lat, lng, address = '') {
     updateLocationInfo(lat, lng, address);
 }
 
-// Update location information display
 function updateLocationInfo(lat, lng, address = '') {
     if (flaggedContainer) {
         const infoDiv = flaggedContainer.querySelector('.absolute');
@@ -190,13 +190,12 @@ function updateLocationInfo(lat, lng, address = '') {
                 </div>
             `;
 
-            // Add event listener to retry button
             document.getElementById('retry-location')?.addEventListener('click', getPreciseLocation);
         }
     }
 }
 
-// Get precise location with multiple fallbacks
+// Improved geolocation for Nigeria with better accuracy
 async function getPreciseLocation() {
     if (isGeolocating) return;
     isGeolocating = true;
@@ -210,20 +209,17 @@ async function getPreciseLocation() {
     showPinFeedback('#3b82f6', 'Locating...');
 
     try {
-        // First try high accuracy with short timeout
         const position = await new Promise((resolve, reject) => {
             const options = {
                 enableHighAccuracy: true,
-                timeout: 10000,  // 10 seconds
-                maximumAge: 0    // No cached position
+                timeout: 15000,
+                maximumAge: 0
             };
 
-            // Clear any existing watch
             if (geolocationWatchId !== null) {
                 navigator.geolocation.clearWatch(geolocationWatchId);
             }
 
-            // Try to get single precise position
             navigator.geolocation.getCurrentPosition(
                 pos => {
                     if (geolocationWatchId !== null) {
@@ -242,7 +238,6 @@ async function getPreciseLocation() {
                 options
             );
 
-            // Fallback to watchPosition if getCurrentPosition takes too long
             geolocationWatchId = navigator.geolocation.watchPosition(
                 pos => {
                     if (geolocationWatchId !== null) {
@@ -262,45 +257,23 @@ async function getPreciseLocation() {
             );
         });
 
-        await handleGeolocationSuccess(position);
+        await handleNigeriaGeolocationSuccess(position);
     } catch (error) {
         console.error('Geolocation error:', error);
-
-        // Fallback to IP-based location if precise geolocation fails
-        try {
-            if (!navigator.onLine) throw new Error('Offline');
-
-            const ipResponse = await fetch('https://ipapi.co/json/');
-            const ipData = await ipResponse.json();
-
-            if (ipData.latitude && ipData.longitude) {
-                updateLocation(
-                    parseFloat(ipData.latitude),
-                    parseFloat(ipData.longitude),
-                    `Approximate location: ${ipData.city || ''}, ${ipData.region || ''}`
-                );
-                showPinFeedback('#f59e0b', 'Approximate location from IP');
-            } else {
-                throw new Error('No coordinates from IP');
-            }
-        } catch (ipError) {
-            console.error('IP location error:', ipError);
-            showPinFeedback('#ef4444', 'Could not get precise location');
-        }
+        showPinFeedback('#ef4444', 'Could not get precise location');
     } finally {
         isGeolocating = false;
     }
 }
 
-// Enhanced geolocation success handler with caching
-async function handleGeolocationSuccess(position) {
+// Nigeria-specific geocoding with improved address parsing
+async function handleNigeriaGeolocationSuccess(position) {
     const { latitude, longitude } = position.coords;
     const cacheKey = `${latitude.toFixed(4)},${longitude.toFixed(4)}`;
 
-    // Check cache first
     if (geocodeCache.has(cacheKey)) {
         const cachedData = geocodeCache.get(cacheKey);
-        updateFormWithGeocodeData(cachedData, latitude, longitude);
+        updateFormWithNigeriaGeocodeData(cachedData, latitude, longitude);
         return;
     }
 
@@ -310,20 +283,16 @@ async function handleGeolocationSuccess(position) {
             throw new Error('No internet connection for address lookup');
         }
 
-        // Try faster Nominatim endpoint first
-        let response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`);
-        let data = await response.json();
-
-        // If no good address, try with different parameters
-        if (!data.address || (!data.address.road && !data.address.city && !data.address.town)) {
-            response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}&zoom=16&addressdetails=1`);
-            data = await response.json();
-        }
+        // Nigeria-specific geocoding with detailed address components
+        const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1&countrycodes=ng`
+        );
+        const data = await response.json();
 
         // Cache the result
         geocodeCache.set(cacheKey, data);
 
-        updateFormWithGeocodeData(data, latitude, longitude);
+        updateFormWithNigeriaGeocodeData(data, latitude, longitude);
         showPinFeedback('#10b981', 'Precise location found');
     } catch (error) {
         console.error('Geocoding error:', error);
@@ -332,35 +301,44 @@ async function handleGeolocationSuccess(position) {
     }
 }
 
-function updateFormWithGeocodeData(data, lat, lng) {
-    const address = data.display_name || 'Location found';
-    const state = data.address?.state;
-    const county = data.address?.county || data.address?.city || data.address?.town;
-    const road = data.address?.road;
+// Improved address parsing for Nigerian locations
+function updateFormWithNigeriaGeocodeData(data, lat, lng) {
+    const address = data.address || {};
+    let streetAddress = '';
+    let state = '';
+    let lga = '';
 
-    let fullAddress = '';
-    if (road) fullAddress += road + ', ';
-    if (county) fullAddress += county + ', ';
-    if (state) fullAddress += state;
+    // Nigerian address hierarchy
+    if (address.road) streetAddress += address.road + ', ';
+    if (address.neighbourhood) streetAddress += address.neighbourhood + ', ';
+    if (address.suburb) streetAddress += address.suburb + ', ';
+    if (address.city) streetAddress += address.city;
+
+    // Special handling for Akure and other Nigerian cities
+    if (address.city === 'Akure') {
+        state = 'Ondo';
+        lga = 'Akure South'; // Default LGA for Akure
+        if (address.suburb) {
+            // Map specific suburbs to LGAs if needed
+            if (address.suburb.includes('Alagbaka')) lga = 'Akure South';
+            else if (address.suburb.includes('Oba-Ile')) lga = 'Akure North';
+        }
+    } else {
+        state = address.state || '';
+        lga = address.county || address.city || '';
+    }
 
     // Update form fields
     if (state && stateSelect) {
-        const stateOptions = Array.from(stateSelect.options).map(opt => opt.value);
-        const matchedState = stateOptions.find(opt =>
-            opt.toLowerCase().replace(/\s/g, '') === state.toLowerCase().replace(/\s/g, '')
-        );
-
-        if (matchedState) {
-            stateSelect.value = matchedState;
-            stateSelect.dispatchEvent(new Event('change'));
-        }
+        stateSelect.value = state;
+        stateSelect.dispatchEvent(new Event('change'));
     }
 
-    if (county && lgaInput) {
-        lgaInput.value = county;
+    if (lga && lgaInput) {
+        lgaInput.value = lga;
     }
 
-    updateLocation(lat, lng, fullAddress || address);
+    updateLocation(lat, lng, streetAddress || data.display_name);
 }
 
 // Visual feedback for pin state
@@ -380,9 +358,7 @@ function showPinFeedback(color, message) {
         if (infoDiv && message) {
             const feedback = document.createElement('div');
             feedback.className = 'bg-white p-2 rounded shadow-md text-sm text-center';
-            feedback.innerHTML = `
-                <p style="color: ${color}">${message}</p>
-            `;
+            feedback.innerHTML = `<p style="color: ${color}">${message}</p>`;
             infoDiv.appendChild(feedback);
 
             setTimeout(() => {
@@ -397,10 +373,8 @@ function showPinFeedback(color, message) {
 // Location pin click handler
 if (locationPin) {
     locationPin.addEventListener('click', async () => {
-        // Initialize map on first click
         if (!map) initMap();
 
-        // Show permission prompt
         if (!confirm("Allow NexaHealth to access your precise location to automatically fill the address fields?")) {
             return;
         }
@@ -418,27 +392,31 @@ if (streetAddressInput) {
 
         if (streetAddressInput.value.trim().length > 5) {
             geocodeTimeout = setTimeout(() => {
-                geocodeAddress(streetAddressInput.value);
+                geocodeNigeriaAddress(streetAddressInput.value);
             }, 1000);
         }
     });
 }
 
-// Geocode manual address input
-async function geocodeAddress(address) {
+// Nigeria-specific address geocoding
+async function geocodeNigeriaAddress(address) {
     if (!address || !map) return;
 
     try {
-        const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1&countrycodes=ng`);
+        const response = await fetch(
+            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1&countrycodes=ng`
+        );
         const data = await response.json();
 
         if (data && data.length > 0) {
             const result = data[0];
-            updateLocation(
-                parseFloat(result.lat),
-                parseFloat(result.lon),
-                result.display_name
+            // Get detailed address information
+            const detailResponse = await fetch(
+                `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${result.lat}&lon=${result.lon}&zoom=18&addressdetails=1`
             );
+            const detailData = await detailResponse.json();
+
+            updateFormWithNigeriaGeocodeData(detailData, result.lat, result.lon);
             showPinFeedback('#10b981', 'Location updated from address');
         }
     } catch (error) {
@@ -446,12 +424,14 @@ async function geocodeAddress(address) {
     }
 }
 
-// State-LGA relationship
+// State-LGA relationship for Nigeria
 if (stateSelect) {
     stateSelect.addEventListener('change', function() {
         if (lgaInput) {
             if (this.value === "Lagos") {
                 lgaInput.placeholder = "e.g. Ikeja, Surulere, Lagos Island";
+            } else if (this.value === "Ondo") {
+                lgaInput.placeholder = "e.g. Akure South, Akure North";
             } else if (this.value === "Federal Capital Territory") {
                 lgaInput.placeholder = "e.g. Municipal, Bwari, Gwagwalada";
             } else {
@@ -573,6 +553,13 @@ document.querySelectorAll('input, select, textarea').forEach(element => {
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
+    // Check if Leaflet is loaded
+    if (typeof L === 'undefined') {
+        console.error('Leaflet library not loaded!');
+        showPinFeedback('#ef4444', 'Map features disabled - missing library');
+        return;
+    }
+
     // Initialize map but keep it hidden until needed
     initMap();
 
