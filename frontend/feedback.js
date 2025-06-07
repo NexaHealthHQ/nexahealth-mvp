@@ -87,4 +87,11 @@
         type.classList.remove('bg-blue-50', 'bg-green-50', 'bg-purple-50', 'bg-red-50', 'border-primary');
       });
     });
+    document.getElementById('close-feedback').addEventListener('click', function() {
+      document.getElementById('feedback-modal').classList.add('hidden');
+    });
+
+    document.getElementById('close-success').addEventListener('click', function() {
+      document.getElementById('feedback-success').classList.add('hidden');
+    });
   });
