@@ -7,7 +7,7 @@ const ASSETS_TO_CACHE = [
   '/report.html',
   '/flagged.html',
   '/symptoms.html',
-  '/ai_companion.html',
+  '/AI_companion.html',
   '/styles/main.css',
   '/images/Nexahealth_image.jpg',
   '/images/icons/icon-192x192.png'
