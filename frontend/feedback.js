@@ -110,6 +110,15 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('feedback-success').classList.add('hidden');
     });
 
+
+    document.getElementById('closeD-feedback').addEventListener('click', function() {
+        document.getElementById('feedback-modal').classList.add('hidden');
+    });
+
+    document.getElementById('close-success').addEventListener('click', function() {
+        document.getElementById('feedback-success').classList.add('hidden');
+    });
+
     function resetFeedbackForm() {
         selectedRating = 0;
         selectedType = '';
