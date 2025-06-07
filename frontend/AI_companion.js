@@ -65,10 +65,10 @@ historyBtn.addEventListener('click', async () => {
         const userId = getUserId();
         const response = await fetch(`${BASE_URL}/ai-companion/history?user_id=${userId}`);
         const data = await response.json();
-
+        
         const historyContainer = historyModal.querySelector('.flex-grow');
         historyContainer.innerHTML = '';
-
+        
         if (data.history && data.history.length > 0) {
             data.history.forEach(item => {
                 const historyItem = document.createElement('div');
@@ -91,7 +91,7 @@ historyBtn.addEventListener('click', async () => {
         } else {
             historyContainer.innerHTML = '<p class="text-gray-500 text-center py-4">No chat history found</p>';
         }
-
+        
         historyModal.classList.remove('hidden');
     } catch (error) {
         console.error('Error fetching history:', error);
@@ -105,7 +105,7 @@ closeHistoryModal.addEventListener('click', () => {
 
 function loadHistoryItem(item) {
     chatMessages.innerHTML = '';
-
+    
     const userMessageDiv = document.createElement('div');
     userMessageDiv.className = 'user-message flex justify-end max-w-[90%] md:max-w-[80%] lg:max-w-[70%] ml-auto';
     userMessageDiv.innerHTML = `
@@ -117,7 +117,7 @@ function loadHistoryItem(item) {
         </div>
     `;
     chatMessages.appendChild(userMessageDiv);
-
+    
     const aiMessageDiv = document.createElement('div');
     aiMessageDiv.className = 'ai-message flex max-w-[90%] md:max-w-[80%] lg:max-w-[70%]';
     aiMessageDiv.innerHTML = `
@@ -190,19 +190,19 @@ async function sendMessage() {
         </div>
     `;
     chatMessages.appendChild(userMessageDiv);
-
+    
     // Clear input
     chatInput.value = '';
-
+    
     // Show typing indicator
     const typingClone = typingIndicator.cloneNode(true);
     typingClone.id = '';
     typingClone.classList.remove('hidden');
     chatMessages.appendChild(typingClone);
-
+    
     // Scroll to bottom
     chatMessages.scrollTop = chatMessages.scrollHeight;
-
+    
     try {
         // Send message to backend
         const response = await fetch(`${BASE_URL}/ai-companion/chat`, {
@@ -222,10 +222,10 @@ async function sendMessage() {
         }
 
         const data = await response.json();
-
+        
         // Remove typing indicator
         chatMessages.removeChild(typingClone);
-
+        
         // Add AI response
         const aiMessageDiv = document.createElement('div');
         aiMessageDiv.className = 'ai-message flex max-w-[90%] md:max-w-[80%] lg:max-w-[70%]';
@@ -243,14 +243,14 @@ async function sendMessage() {
             </div>
         `;
         chatMessages.appendChild(aiMessageDiv);
-
+        
         // Scroll to bottom
         chatMessages.scrollTop = chatMessages.scrollHeight;
     } catch (error) {
         console.error('Error sending message:', error);
         // Remove typing indicator
         chatMessages.removeChild(typingClone);
-
+        
         // Show error message
         const errorMessageDiv = document.createElement('div');
         errorMessageDiv.className = 'ai-message flex max-w-[90%] md:max-w-[80%] lg:max-w-[70%]';

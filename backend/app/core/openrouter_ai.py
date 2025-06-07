@@ -50,7 +50,7 @@ def enhance_response(raw_response: str, language: str) -> str:
         "English": {
             "greeting": "Hello!",
             "advice_header": "**What you can do:**",
-            "prompt": "**Please tell me:** How are you feeling now? Want to share more? 💬",
+            "prompt": "",
             "emojis": ["👋", "💧", "✨"]
         }
     }
