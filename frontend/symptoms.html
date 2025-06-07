@@ -467,116 +467,115 @@
             <p class="text-xs sm:text-sm">&copy; 2025 NexaHealth. All rights reserved.</p>
         </div>
     </div>
-        <!-- Add this just before the closing </body> tag -->
     <!-- Add this just before the closing </body> tag -->
-<div id="feedback-system">
-  <!-- Floating Feedback Button -->
-  <button id="feedback-button" class="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-gradient-to-br from-primary to-secondary shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center animate-pulse-slow">
-    <i class="fas fa-comment-medical text-white text-xl"></i>
-  </button>
-
-  <!-- Feedback Modal -->
-  <div id="feedback-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-xl overflow-hidden w-full max-w-md max-h-[90vh] flex flex-col animate__animated animate__fadeInUp">
-      <!-- Header -->
-      <div class="bg-gradient-to-r from-primary to-secondary p-4 relative">
-        <h3 class="text-xl font-bold text-white font-serif">Share Your Feedback</h3>
-        <p class="text-white text-opacity-90 text-sm mt-1">Help us improve our symptom checker</p>
-        <button id="close-feedback" class="absolute top-4 right-4 text-white hover:text-gray-200 transition-colors">
-          <i class="fas fa-times"></i>
-        </button>
-      </div>
-
-      <!-- Scrollable Content -->
-      <div class="overflow-y-auto flex-1 p-6">
-        <!-- Rating -->
-        <div class="mb-6">
-          <label class="block text-gray-700 mb-3">How would you rate your experience?</label>
-          <div class="flex justify-center space-x-2">
-            <button class="rating-star w-10 h-10 rounded-full bg-gray-100 hover:bg-yellow-100 flex items-center justify-center transition-colors" data-rating="1">
-              <i class="far fa-star text-gray-400 text-xl"></i>
-            </button>
-            <button class="rating-star w-10 h-10 rounded-full bg-gray-100 hover:bg-yellow-100 flex items-center justify-center transition-colors" data-rating="2">
-              <i class="far fa-star text-gray-400 text-xl"></i>
-            </button>
-            <button class="rating-star w-10 h-10 rounded-full bg-gray-100 hover:bg-yellow-100 flex items-center justify-center transition-colors" data-rating="3">
-              <i class="far fa-star text-gray-400 text-xl"></i>
-            </button>
-            <button class="rating-star w-10 h-10 rounded-full bg-gray-100 hover:bg-yellow-100 flex items-center justify-center transition-colors" data-rating="4">
-              <i class="far fa-star text-gray-400 text-xl"></i>
-            </button>
-            <button class="rating-star w-10 h-10 rounded-full bg-gray-100 hover:bg-yellow-100 flex items-center justify-center transition-colors" data-rating="5">
-              <i class="far fa-star text-gray-400 text-xl"></i>
-            </button>
-          </div>
-        </div>
-
-        <!-- Feedback Type -->
-        <div class="mb-6">
-          <label class="block text-gray-700 mb-3">What type of feedback is this?</label>
-          <div class="grid grid-cols-2 gap-3">
-            <button class="feedback-type bg-gray-100 hover:bg-blue-50 border border-gray-200 rounded-lg py-2 px-3 transition-colors flex items-center" data-type="suggestion">
-              <i class="fas fa-lightbulb text-blue-500 mr-2"></i>
-              <span>Suggestion</span>
-            </button>
-            <button class="feedback-type bg-gray-100 hover:bg-green-50 border border-gray-200 rounded-lg py-2 px-3 transition-colors flex items-center" data-type="bug">
-              <i class="fas fa-bug text-green-500 mr-2"></i>
-              <span>Bug Report</span>
-            </button>
-            <button class="feedback-type bg-gray-100 hover:bg-purple-50 border border-gray-200 rounded-lg py-2 px-3 transition-colors flex items-center" data-type="praise">
-              <i class="fas fa-hands-clapping text-purple-500 mr-2"></i>
-              <span>Praise</span>
-            </button>
-            <button class="feedback-type bg-gray-100 hover:bg-red-50 border border-gray-200 rounded-lg py-2 px-3 transition-colors flex items-center" data-type="question">
-              <i class="fas fa-question-circle text-red-500 mr-2"></i>
-              <span>Question</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Message -->
-        <div class="mb-6">
-          <label for="feedback-message" class="block text-gray-700 mb-2">Your feedback (optional)</label>
-          <textarea id="feedback-message" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all" placeholder="Tell us about your experience with the symptom checker..."></textarea>
-        </div>
-
-        <!-- Language Selection -->
-        <div class="mb-6">
-          <label class="block text-gray-700 mb-2">Preferred response language</label>
-          <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all">
-            <option>English</option>
-            <option>Pidgin</option>
-            <option>Yoruba</option>
-            <option>Hausa</option>
-            <option>Igbo</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- Fixed Footer with Submit Button -->
-      <div class="p-4 border-t border-gray-200 bg-white">
-        <button id="submit-feedback" class="w-full bg-gradient-to-r from-primary to-secondary hover:from-secondary hover:to-primary text-white py-3 px-4 rounded-lg font-medium transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center">
-          <i class="fas fa-paper-plane mr-2"></i>
-          Send Feedback
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Success Message -->
-  <div id="feedback-success" class="fixed bottom-6 right-6 z-50 hidden">
-    <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg shadow-lg flex items-start animate__animated animate__fadeInUp">
-      <i class="fas fa-check-circle text-green-500 mr-2 mt-1"></i>
-      <div>
-        <p class="font-medium">Thank you!</p>
-        <p class="text-sm">Your feedback has been received.</p>
-      </div>
-      <button id="close-success" class="ml-4 text-green-700 hover:text-green-900">
-        <i class="fas fa-times"></i>
+    <div id="feedback-system">
+      <!-- Floating Feedback Button -->
+      <button id="feedback-button" class="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-gradient-to-br from-primary to-secondary shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center animate-pulse-slow">
+        <i class="fas fa-comment-medical text-white text-xl"></i>
       </button>
+
+      <!-- Feedback Modal -->
+      <div id="feedback-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-xl overflow-hidden w-full max-w-md max-h-[90vh] flex flex-col animate__animated animate__fadeInUp">
+          <!-- Header -->
+          <div class="bg-gradient-to-r from-primary to-secondary p-4 relative">
+            <h3 class="text-xl font-bold text-white font-serif">Share Your Feedback</h3>
+            <p class="text-white text-opacity-90 text-sm mt-1">Help us improve our symptom checker</p>
+            <button id="close-feedback" class="absolute top-4 right-4 text-white hover:text-gray-200 transition-colors">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+
+          <!-- Scrollable Content -->
+          <div class="overflow-y-auto flex-1 p-6">
+            <!-- Rating -->
+            <div class="mb-6">
+              <label class="block text-gray-700 mb-3 font-medium">How would you rate your experience?</label>
+              <div class="flex justify-center space-x-2">
+                <button class="rating-star w-10 h-10 rounded-full bg-gray-100 hover:bg-yellow-100 flex items-center justify-center transition-colors" data-rating="1">
+                  <i class="far fa-star text-gray-400 text-xl"></i>
+                </button>
+                <button class="rating-star w-10 h-10 rounded-full bg-gray-100 hover:bg-yellow-100 flex items-center justify-center transition-colors" data-rating="2">
+                  <i class="far fa-star text-gray-400 text-xl"></i>
+                </button>
+                <button class="rating-star w-10 h-10 rounded-full bg-gray-100 hover:bg-yellow-100 flex items-center justify-center transition-colors" data-rating="3">
+                  <i class="far fa-star text-gray-400 text-xl"></i>
+                </button>
+                <button class="rating-star w-10 h-10 rounded-full bg-gray-100 hover:bg-yellow-100 flex items-center justify-center transition-colors" data-rating="4">
+                  <i class="far fa-star text-gray-400 text-xl"></i>
+                </button>
+                <button class="rating-star w-10 h-10 rounded-full bg-gray-100 hover:bg-yellow-100 flex items-center justify-center transition-colors" data-rating="5">
+                  <i class="far fa-star text-gray-400 text-xl"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Feedback Type -->
+            <div class="mb-6">
+              <label class="block text-gray-700 mb-3 font-medium">What type of feedback is this?</label>
+              <div class="grid grid-cols-2 gap-3">
+                <button class="feedback-type bg-gray-100 hover:bg-blue-50 border border-gray-200 rounded-lg py-2 px-3 transition-colors flex items-center text-gray-800" data-type="suggestion">
+                  <i class="fas fa-lightbulb text-blue-500 mr-2"></i>
+                  <span class="text-sm font-medium">Suggestion</span>
+                </button>
+                <button class="feedback-type bg-gray-100 hover:bg-green-50 border border-gray-200 rounded-lg py-2 px-3 transition-colors flex items-center text-gray-800" data-type="bug">
+                  <i class="fas fa-bug text-green-500 mr-2"></i>
+                  <span class="text-sm font-medium">Bug Report</span>
+                </button>
+                <button class="feedback-type bg-gray-100 hover:bg-purple-50 border border-gray-200 rounded-lg py-2 px-3 transition-colors flex items-center text-gray-800" data-type="praise">
+                  <i class="fas fa-hands-clapping text-purple-500 mr-2"></i>
+                  <span class="text-sm font-medium">Praise</span>
+                </button>
+                <button class="feedback-type bg-gray-100 hover:bg-red-50 border border-gray-200 rounded-lg py-2 px-3 transition-colors flex items-center text-gray-800" data-type="question">
+                  <i class="fas fa-question-circle text-red-500 mr-2"></i>
+                  <span class="text-sm font-medium">Question</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Message -->
+            <div class="mb-6">
+              <label for="feedback-message" class="block text-gray-700 mb-2 font-medium">Your feedback (optional)</label>
+              <textarea id="feedback-message" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-gray-700" placeholder="Tell us about your experience with the symptom checker..."></textarea>
+            </div>
+
+            <!-- Language Selection -->
+            <div class="mb-6">
+              <label class="block text-gray-700 mb-2 font-medium">Preferred response language</label>
+              <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-gray-700 bg-white">
+                <option class="text-gray-700">English</option>
+                <option class="text-gray-700">Pidgin</option>
+                <option class="text-gray-700">Yoruba</option>
+                <option class="text-gray-700">Hausa</option>
+                <option class="text-gray-700">Igbo</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Fixed Footer with Submit Button -->
+          <div class="p-4 border-t border-gray-200 bg-white">
+            <button id="submit-feedback" class="w-full bg-gradient-to-r from-primary to-secondary hover:from-secondary hover:to-primary text-white py-3 px-4 rounded-lg font-medium transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center">
+              <i class="fas fa-paper-plane mr-2"></i>
+              Send Feedback
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Success Message -->
+      <div id="feedback-success" class="fixed bottom-6 right-6 z-50 hidden">
+        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg shadow-lg flex items-start animate__animated animate__fadeInUp">
+          <i class="fas fa-check-circle text-green-500 mr-2 mt-1"></i>
+          <div>
+            <p class="font-medium">Thank you!</p>
+            <p class="text-sm">Your feedback has been received.</p>
+          </div>
+          <button id="close-success" class="ml-4 text-green-700 hover:text-green-900">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
 </footer>
 <script src="symptoms.js"></script>
 <script src="feedback.js"></script>
