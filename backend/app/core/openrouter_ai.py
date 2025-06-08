@@ -1,103 +1,121 @@
 import requests
 import os
 import re
-from typing import Optional
+from typing import Optional, List, Dict
 
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "your-api-key-here")
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 MODEL = "google/gemini-2.0-flash-exp:free"
+
+# Language configuration with structured templates
+LANGUAGE_TEMPLATES = {
+    "english": {
+        "greeting": "Hello! 👋",
+        "sections": [
+            ("Understanding Your Concern", "🔍"),
+            ("Recommended Actions", "🩺"),
+            ("When to Seek Help", "⚠️"),
+            ("Follow-up", "💬")
+        ],
+        "closing": "Would you like me to clarify anything?"
+    },
+    "pidgin": {
+        "greeting": "How far! 👋",
+        "sections": [
+            ("Wetin I Sabi", "🔍"),
+            ("Wetin You Fit Do", "🩺"),
+            ("When to See Doctor", "⚠️"),
+            ("Make We Talk More", "💬")
+        ],
+        "closing": "You get any question?"
+    },
+    "yoruba": {
+        "greeting": "Bawo ni! 👋",
+        "sections": [
+            ("Ohun ti Mo Gbọ", "🔍"),
+            ("Ohun ti O Le Ṣe", "🩺"),
+            ("Igba ti O Yẹ Lati Raa Dokita", "⚠️"),
+            ("Atunṣe", "💬")
+        ],
+        "closing": "Ṣe o ni ibeere miiran?"
+    },
+    "hausa": {
+        "greeting": "Sannu! 👋",
+        "sections": [
+            ("Abin da Na Gane", "🔍"),
+            ("Abin da Zaka iya Yi", "🩺"),
+            ("Lokacin Neman Taimako", "⚠️"),
+            ("Ci gaba", "💬")
+        ],
+        "closing": "Kuna da wani tambaya?"
+    }
+}
 
 
 def detect_language(text: str) -> str:
-    """Detect language based on keywords with improved matching"""
-    language_patterns = {
-        "Yoruba": [r"\bbawo\b", r"\bse\b", r"\bni\b", r"\bowo\b", r"\bire\b"],
-        "Pidgin English": [r"\bhow far\b", r"\babi\b", r"\bno be\b", r"\bwahala\b", r"\bdem\b"],
-        "Hausa": [r"\bsannu\b", r"\blafiya\b", r"\byaya\b", r"\bnagode\b", r"\bina\b"]
+    """Improved language detection with confidence scoring"""
+    language_keywords = {
+        "pidgin": [r"\bhow far\b", r"\babi\b", r"\bno be\b", r"\bwahala\b"],
+        "yoruba": [r"\bbawo\b", r"\bse\b", r"\bni\b", r"\bowo\b"],
+        "hausa": [r"\bsannu\b", r"\blafiya\b", r"\byaya\b", r"\bnagode\b"]
     }
 
     text_lower = text.lower()
-    for lang, patterns in language_patterns.items():
-        if any(re.search(pattern, text_lower) for pattern in patterns):
-            return lang
-    return "English"
+    scores = {lang: sum(bool(re.search(p, text_lower)) for lang, p in language_keywords.items()}
+    return max(scores, key=scores.get) if max(scores.values()) > 0 else "english"
 
 
-def enhance_response(raw_response: str, language: str) -> str:
+def structure_response(raw_response: str, language: str) -> str:
     """
-    Intelligently enhances the raw AI response with consistent formatting,
-    emojis, and conversation prompts while preserving its original meaning.
+    Transforms raw AI response into a beautifully formatted message with:
+    - Clear section headers
+    - Proper line breaks
+    - Emoji visual cues
+    - Consistent structure
     """
-    # Language-specific configurations
-    enhancements = {
-        "Pidgin English": {
-            "greeting": "Ah!",
-            "advice_header": "**Wetin you fit do:**",
-            "prompt": "**Abeg tell me:** How you dey feel now? You wan talk more? 🙏",
-            "emojis": ["😊", "💧", "👍"]
-        },
-        "Yoruba": {
-            "greeting": "E kaaro!",
-            "advice_header": "**Ohun ti o le se:**",
-            "prompt": "**Jowo so fun mi:** Se o ni nkan miiran ti o fe so? 💬",
-            "emojis": ["🌟", "🚰", "🙌"]
-        },
-        "Hausa": {
-            "greeting": "Sannu!",
-            "advice_header": "**Abin da za ka iya yi:**",
-            "prompt": "**Don Allah a gaya mani:** Kana jin kara magana? 📢",
-            "emojis": ["🌞", "💦", "👌"]
-        },
-        "English": {
-            "greeting": "Hello!",
-            "advice_header": "**What you can do:**",
-            "prompt": "",
-            "emojis": ["👋", "💧", "✨"]
-        }
-    }
+    template = LANGUAGE_TEMPLATES.get(language, LANGUAGE_TEMPLATES["english"])
 
-    config = enhancements.get(language, enhancements["English"])
+    # Split response into logical parts
+    parts = [p.strip() for p in re.split(r'(?<=[.!?])\s+', raw_response) if p.strip()]
 
-    # Split response into sentences while preserving the original meaning
-    sentences = [s.strip() for s in re.split(r'(?<=[.!?])\s+', raw_response) if s.strip()]
+    # Build structured response
+    lines = [f"**Nexa Health Companion**\n{template['greeting']}\n"]
 
-    # Build enhanced response
-    enhanced = [f"**Nexa AI:**\n\n{config['greeting']} {sentences[0]}{config['emojis'][0]}\n\n"]
+    # Add sections with appropriate content
+    for i, (section, emoji) in enumerate(template["sections"]):
+        if i < len(parts):
+            lines.append(f"\n**{emoji} {section}**\n{parts[i]}\n")
 
-    if len(sentences) > 1:
-        enhanced.append(f"{config['advice_header']}\n")
-        for sentence in sentences[1:]:
-            enhanced.append(f"- {sentence}\n")
-        enhanced.append(f"\n")
+    # Add closing prompt
+    lines.append(f"\n{template['closing']}")
 
-    # Always add hydration reminder and conversation prompt
-    enhanced.append(f"- Remember to drink water {config['emojis'][1]}\n\n")
-    enhanced.append(config['prompt'])
-
-    return "".join(enhanced)
+    return "\n".join(lines)
 
 
-def get_ai_response(message: str, history: Optional[list] = None) -> str:
-    """Get AI response with automatic language detection and enhanced formatting"""
+def get_ai_response(message: str, history: Optional[List[Dict]] = None) -> str:
+    """Gets formatted AI response with proper structure"""
     if history is None:
         history = []
 
-    user_language = detect_language(message)
+    language = detect_language(message)
 
-    # Enhanced system prompt that encourages structured responses
-    system_prompt = (
-        f"You are Nexa AI Health Companion, a friendly health assistant for Africans. "
-        f"Respond in {user_language} when appropriate. Keep responses:\n"
-        f"- Conversational but professional\n"
-        f"- 2-3 short paragraphs maximum\n"
-        f"- Include practical advice\n"
-        f"- End with an open-ended question\n"
-        f"Current conversation language: {user_language}\n"
-        f"Important: Don't diagnose, just suggest and recommend professional help when needed."
-    )
+    system_prompt = f"""You are Nexa, a friendly African health assistant. Respond in {language} when appropriate.
 
-    messages = [{"role": "system", "content": system_prompt}]
-    messages.extend(history)
-    messages.append({"role": "user", "content": message})
+    Structure your responses clearly:
+    1. Briefly acknowledge the concern
+    2. Provide 2-3 practical suggestions 
+    3. Mention warning signs
+    4. End with an open question
+
+    Keep responses:
+    - Under 4 sentences per section
+    - Culturally appropriate
+    - Professional yet warm"""
+
+    messages = [
+        {"role": "system", "content": system_prompt},
+        *history,
+        {"role": "user", "content": message}
+    ]
 
     try:
         response = requests.post(
@@ -109,14 +127,15 @@ def get_ai_response(message: str, history: Optional[list] = None) -> str:
             json={
                 "model": MODEL,
                 "messages": messages,
-                "temperature": 0.7  # For more creative responses
+                "temperature": 0.7,
+                "max_tokens": 300  # Limit response length
             },
             timeout=10
         )
         response.raise_for_status()
 
-        raw_response = response.json()["choices"][0]["message"]["content"]
-        return enhance_response(raw_response, user_language)
+        raw_content = response.json()["choices"][0]["message"]["content"]
+        return structure_response(raw_content, language)
 
-    except requests.exceptions.RequestException as e:
-        return f"**Nexa AI:**\n\nSorry, I'm having trouble responding right now. Please try again later. 🙏"
+    except Exception as e:
+        return "**Nexa Health Companion**\n\nSorry, I'm experiencing technical difficulties. Please try again later. 🛠️"
