@@ -67,29 +67,37 @@ def detect_language(text: str) -> str:
 
 def structure_response(raw_response: str, language: str) -> str:
     """
-    Transforms raw AI response into a beautifully formatted message with:
-    - Clear section headers
-    - Proper line breaks
-    - Emoji visual cues
-    - Consistent structure
+    Transforms raw AI response into a properly formatted message with:
+    - Clear line breaks
+    - Section separation
+    - Consistent spacing
     """
     template = LANGUAGE_TEMPLATES.get(language, LANGUAGE_TEMPLATES["english"])
 
-    # Split response into logical parts
-    parts = [p.strip() for p in re.split(r'(?<=[.!?])\s+', raw_response) if p.strip()]
+    # First, clean up any existing formatting
+    cleaned_response = re.sub(r'\*\*', '', raw_response)  # Remove existing markdown
 
-    # Build structured response
-    lines = [f"**Nexa Health Companion**\n{template['greeting']}\n"]
+    # Split into logical sections
+    sections = re.split(r'(?<=[.!?])\s+', cleaned_response)
 
-    # Add sections with appropriate content
-    for i, (section, emoji) in enumerate(template["sections"]):
-        if i < len(parts):
-            lines.append(f"\n**{emoji} {section}**\n{parts[i]}\n")
+    # Build properly formatted response
+    lines = [
+        "**Nexa Health Companion**\n",
+        f"{template['greeting']}\n\n"
+    ]
 
-    # Add closing prompt
-    lines.append(f"\n{template['closing']}")
+    # Add each section with proper spacing
+    for i, (section_title, emoji) in enumerate(template['sections']):
+        if i < len(sections):
+            lines.extend([
+                f"**{emoji} {section_title}**\n",
+                f"{sections[i].strip()}\n\n"
+            ])
 
-    return "\n".join(lines)
+    # Add closing
+    lines.append(f"{template['closing']}")
+
+    return "".join(lines)
 
 
 def get_ai_response(message: str, history: Optional[List[Dict]] = None) -> str:
