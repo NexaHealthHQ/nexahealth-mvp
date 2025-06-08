@@ -60,7 +60,8 @@ def detect_language(text: str) -> str:
     }
 
     text_lower = text.lower()
-    scores = {lang: sum(bool(re.search(p, text_lower)) for lang, p in language_keywords.items()}
+    scores = {lang: sum(bool(re.search(p, text_lower)) for p in patterns)
+              for lang, patterns in language_keywords.items()}
     return max(scores, key=scores.get) if max(scores.values()) > 0 else "english"
 
 
